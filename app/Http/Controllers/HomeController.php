@@ -20,10 +20,9 @@ class HomeController extends Controller
      * Show the application dashboard.
      *
      * @return \Illuminate\Contracts\Support\Renderable
-     * redirects to to do list
      */
     public function index()
     {
-        return Redirect('list');
+        return view('home');
     }
 }

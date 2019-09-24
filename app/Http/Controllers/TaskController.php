@@ -11,60 +11,79 @@ class TaskController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+       // $this->middleware('auth');
     }
 /*
  * Get all Tasks
- */
+
     public function index(){
          $tasks = Task::where("isdeleted", false)->orderBy("id", "DESC")->get();
 
         return view("welcome", compact("tasks"));
+    }*/
+    public function index(Request $request){
+        $tasks = Task::where("isdeleted", false)->orderBy("id", "DESC")->get();
+        if ((!empty($request->api)) && ($request->api==1)){
+            return response()->json( $tasks  );
+        }else{
+            return view("welcome", compact("tasks"));
+        }
+
     }
     /*
     * Edit task where id
     */
     public function edit($id){
         $task = Task::where("id", $id)->first();
-        return view("welcome", compact("task"));
+        return response()->json( $task  );
     }
     /*
      * Post task to database
      */
     public function post(Request $request)
     {
-        if($request->t_id){
-            $task = Task::find($request->t_id);
-            $task->task =$request->task ;
-            $task->save();
-            $message="Task updated successfully!";
-        }else{
-            $input = $request->all();
+        $task=$request->task ;
+        $desc=$task['task_desc'] ;
+
             $task = new Task();
-            $task->task = request("task");
+            $task->task = $desc;
             $task->save();
             $message="Task has been added!";
-        }
-        return Redirect('list')->with("message", $message);
+        return response()->json(  $message);
+    }
+    /*
+ * Post task to database
+ */
+    public function update($id,Request $request)
+    {
+        $task=$request->task ;
+        $desc=$task['task_desc'] ;
+
+             $task = Task::find($id);
+             $task->task =$desc;
+             $task->save();
+             $message="Task updated successfully!";
+
+        return response()->json(  $message);
     }
     /*
    * Mark task as completed
    */
-    public function complete($id)
+    public function complete(Request $request)
     {
-        $task = Task::find($id);
+        $task = Task::find($request->task_id);
         $task->iscompleted =1 ;
         $task->save();
-        return Redirect('list')->with("message", "Task updated o completed list");
+        return response()->json( "Task updated o completed list"  );
     }
  /*
 * Mark task as deleted
 */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        $task = Task::find($id);
+        $task = Task::find($request->task_id);
         $task->isdeleted =1 ;
         $task->save();
-        return Redirect('list')->with('message', "Task deleted");
+        return response()->json( "Task deleted"  );
     }
 }//end controller
